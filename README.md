@@ -1,5 +1,6 @@
 # url-search
 An address bar parameter managerment plugin.
+## ver 1.0.0
 ## use
 ```
 const URLSearch = require('url-search');
