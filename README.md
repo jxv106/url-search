@@ -17,4 +17,9 @@ url.data.type = 1;
 url.data.keyword = 'hello';
 url.update();
 // '?type=1&keyword=hello'
+
+// observe
+url.data.type = 1; // '?type=1'
+url.data.type = 2; // '?type=2'
+// 
 ```
