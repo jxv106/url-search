@@ -1,5 +1,5 @@
 # url-search
-An address bar parameter managerment plugin.
+## 基于Object.defineProperty的地址栏参数管理插件.
 ## npm i url-search
 ## ver 1.0.3
 ## use
