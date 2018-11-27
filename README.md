@@ -1,5 +1,6 @@
 # url-search
-## 基于Object.defineProperty的地址栏参数管理插件.
+## 基于响应式的地址栏参数管理插件.
+## 支持IE10
 ## npm i url-search
 ## ver 1.0.3
 ## use
