@@ -1,6 +1,6 @@
 ;(function(global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-  typeof define === 'function' && define.amd ? define(factory) : (global.URLSearch = factory())
+    typeof define === 'function' && define.amd ? define(factory) : (global.URLSearch = factory())
 })(window, function() {
   function URLSearch() {
     if (!(this instanceof URLSearch)) {
@@ -18,18 +18,18 @@
         var current = Object.keys(queryList[i]);
         this.data[current[0]] = queryList[i][current[0]]
       };
-      watcher(this.data)
+      this.update()
     }
   }
 
   URLSearch.parse = function(url) {
+    if (!url) return;
     return parseURL(url)
   }
 
   URLSearch.prototype.push = function(key, val) {
-    if (typeof key !== 'object' && typeof key !== 'function') {
+    if (key && typeof key !== 'object' && typeof key !== 'function') {
       this.data[key] = val || '';
-      watcher(this.data);
       this.update()
     }
   }
@@ -37,6 +37,7 @@
   URLSearch.prototype.remove = function(key) {
     var that = this;
     var otherKey = {};
+    if (!key) return;
     Object.keys(this.data).forEach(function($key) {
       if (typeof key !== 'object' && typeof key !== 'function') {
         if ($key !== key) {
@@ -45,12 +46,19 @@
       }
     });
     this.data = otherKey;
-    watcher(this.data);
     this.update()
   }
 
   URLSearch.prototype.update = function() {
-    update(this.data)
+    var that = this;
+    Object.keys(this.data).forEach(function(key) {
+      if (that.data['__proto__'].hasOwnProperty(key) || key === '__proto__') {
+        that.remove(key);
+        console.warn('Cannot set built-in properties =>> ' + key + '\n deleted =>> ' + key);
+      }
+    });
+    update(this.data);
+    watcher(this.data);
   }
 
   URLSearch.prototype.toString = function() {
@@ -102,7 +110,7 @@
   }
 
   function update(data) {
-    var result;
+    var result = '';
     Object.keys(data).forEach(function(key, index) {
       if (index === 0) {
         result = '?' + key + '=' + data[key]
