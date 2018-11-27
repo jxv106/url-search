@@ -22,6 +22,10 @@
     }
   }
 
+  URLSearch.parse = function(url) {
+    return parseURL(url)
+  }
+
   URLSearch.prototype.push = function(key, val) {
     if (typeof key !== 'object' && typeof key !== 'function') {
       this.data[key] = val || '';
@@ -47,6 +51,17 @@
 
   URLSearch.prototype.update = function() {
     update(this.data)
+  }
+
+  URLSearch.prototype.toString = function() {
+    var that = this;
+    var result = [];
+    Object.keys(this.data).forEach(function(key) {
+      result.push(key + '=' + that.data[key])
+    });
+    if (result.length) {
+      return '?' + result.join('&')
+    } return ''
   }
 
   function parseURL() {
