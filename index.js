@@ -1,6 +1,6 @@
 ;(function(global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-    typeof define === 'function' && define.amd ? define(factory) : (global.URLSearch = factory())
+  typeof define === 'function' && define.amd ? define(factory) : (global.URLSearch = factory())
 })(window, function() {
   function URLSearch() {
     if (!(this instanceof URLSearch)) {
@@ -17,8 +17,8 @@
       for (var i = 0; i < queryList.length; i++) {
         var current = Object.keys(queryList[i]);
         this.data[current[0]] = queryList[i][current[0]]
-      };
-      this.update()
+      }
+      watcher(this.data)
     }
   }
 
@@ -51,14 +51,27 @@
 
   URLSearch.prototype.update = function() {
     var that = this;
-    Object.keys(this.data).forEach(function(key) {
-      if (that.data['__proto__'].hasOwnProperty(key) || key === '__proto__') {
-        that.remove(key);
-        console.warn('Cannot set built-in properties =>> ' + key + '\n deleted =>> ' + key);
+    var map = {};
+    if (this.data !== null && typeof this.data === 'object') {
+      Object.keys(this.data).forEach(function(key) {
+        if (Object.getPrototypeOf(that.data).hasOwnProperty(key) || key === '__proto__') {
+          that.remove(key);
+          console.warn('Cannot set built-in properties =>> ' + key + '\n deleted =>> ' + key)
+        } else {
+          map[key] = that.data[key]
+        }
+      });
+      if (!isEmptyObject(map)) {
+        this.data = map;
+        update(this.data);
+        watcher(this.data)
+      } else {
+        this.data = map;
+        update({})
       }
-    });
-    update(this.data);
-    watcher(this.data);
+    } else {
+      console.warn('Data can only be an object type =>> { data = ' + typeof this.data + '}')
+    }
   }
 
   URLSearch.prototype.toString = function() {
@@ -69,7 +82,15 @@
     });
     if (result.length) {
       return '?' + result.join('&')
-    } return ''
+    }
+    return ''
+  }
+
+  function isEmptyObject(v) {
+    for (var item in v) {
+      return false
+    }
+    return true
   }
 
   function parseURL() {
@@ -121,7 +142,7 @@
     if (history && history.replaceState) {
       history.replaceState(null, null, result || location.href.split('?')[0])
     } else {
-      location.replace(location.href.split('?')[0] + (result || ''))
+      location.replace(location.href.split('?')[0] + (result || null))
     }
   }
   return URLSearch
