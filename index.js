@@ -95,8 +95,10 @@
         result = result + '&' + key + '=' + data[key]
       }
     });
-    if (window.history && window.history.replaceState) {
-      window.history.replaceState(null, null, result || window.location.href.split('?')[0])
+    if (history && history.replaceState) {
+      history.replaceState(null, null, result || location.href.split('?')[0])
+    } else {
+      location.replace(location.href.split('?')[0] + (result || ''))
     }
   }
   return URLSearch
