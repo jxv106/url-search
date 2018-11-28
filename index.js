@@ -41,12 +41,11 @@
     } else if (arguments.length >= 2) {
       if (
         key &&
-        val &&
         typeof key === 'string' &&
         (typeof val === 'string' || typeof val === 'number')
       ) {
         $key = key;
-        $val = val
+        $val = val || ''
       }
     } else {
       val = ''
@@ -99,13 +98,7 @@
             map[key] = that.data[key]
           }
         } else {
-          console.warn(
-            'Only values ​​of type String|Number can be added =>> '
-            + '\n data = { '
-            + key
-            + ': '
-            + typeof that.data[key] +
-            ' }')
+          typeError(key, that.data[key])
         }
       });
       if (!isEmptyObject(map)) {
@@ -135,6 +128,16 @@
       return '?' + result.join('&')
     }
     return ''
+  }
+
+  function typeError (key, value) {
+    console.warn(
+      'Only values ​​of type String|Number can be added =>> '
+      + '\n data = { '
+      + key
+      + ': '
+      + typeof value +
+      ' }')
   }
 
   function isEmptyObject(v) {
@@ -172,22 +175,16 @@
         },
         set: function setter(newVal) {
           console.log(newVal)
-          if (newVal && (
-              typeof newVal === 'string' ||
-              typeof newVal === 'number'
-            )) {
+          if (
+            typeof newVal === 'string' ||
+            typeof newVal === 'number'
+          ) {
             if (newVal !== value) {
               value = newVal;
               update(obj)
             }
           } else {
-            console.warn(
-              'Only values ​​of type String|Number can be added =>> '
-              + '\n data = { '
-              + key
-              + ': '
-              + typeof newVal +
-              ' }')
+            typeError(key, newVal)
           }
         }
       })
