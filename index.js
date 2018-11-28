@@ -23,26 +23,50 @@
   }
 
   URLSearch.parse = function(url) {
-    if (!url) return;
-    return parseURL(url)
+    if (
+      url &&
+      typeof url === 'string'
+    ) {
+      return parseURL(url)
+    }
   }
 
   URLSearch.prototype.push = function(key, val) {
-    if (key && typeof key !== 'object' && typeof key !== 'function') {
-      this.data[key] = val || '';
+    var $key, $val;
+    if (arguments.length === 1) {
+      if (typeof key === 'string') {
+        $key = key;
+        $val = ''
+      }
+    } else if (arguments.length >= 2) {
+      if (
+        key &&
+        val &&
+        typeof key === 'string' &&
+        (typeof val === 'string' || typeof val === 'number')
+      ) {
+        $key = key;
+        $val = val
+      }
+    } else {
+      val = ''
+    }
+    if ($key) {
+      this.data[$key] = $val;
       this.update()
     }
   }
 
   URLSearch.prototype.remove = function(key) {
-    var that = this;
-    var otherKey = {};
-    if (!key) return;
+    var that = this,
+      otherKey = {};
+    if (
+      !key &&
+      typeof url !== 'string'
+    ) return;
     Object.keys(this.data).forEach(function($key) {
-      if (typeof key !== 'object' && typeof key !== 'function') {
-        if ($key !== key) {
-          otherKey[$key] = that.data[$key]
-        }
+      if ($key !== key) {
+        otherKey[$key] = that.data[$key]
       }
     });
     this.data = otherKey;
@@ -50,15 +74,38 @@
   }
 
   URLSearch.prototype.update = function() {
-    var that = this;
-    var map = {};
-    if (this.data !== null && typeof this.data === 'object') {
+    var that = this,
+      map = {};
+    if (
+      this.data !== null &&
+      typeof this.data === 'object'
+    ) {
       Object.keys(this.data).forEach(function(key) {
-        if (Object.getPrototypeOf(that.data).hasOwnProperty(key) || key === '__proto__') {
-          that.remove(key);
-          console.warn('Cannot set built-in properties =>> ' + key + '\n deleted =>> ' + key)
+        if (
+          typeof that.data[key] === 'string' ||
+          typeof that.data[key] === 'number'
+        ) {
+          if (
+            Object.getPrototypeOf(that.data).hasOwnProperty(key) ||
+            key === '__proto__'
+          ) {
+            that.remove(key);
+            console.warn(
+              'Cannot set built-in properties =>> '
+              + key
+              + '\n deleted =>> '
+              + key)
+          } else {
+            map[key] = that.data[key]
+          }
         } else {
-          map[key] = that.data[key]
+          console.warn(
+            'Only values ​​of type String|Number can be added =>> '
+            + '\n data = { '
+            + key
+            + ': '
+            + typeof that.data[key] +
+            ' }')
         }
       });
       if (!isEmptyObject(map)) {
@@ -70,13 +117,17 @@
         update({})
       }
     } else {
-      console.warn('Data can only be an object type =>> { data = ' + typeof this.data + '}')
+      console.warn(
+        'Data can only be an object type =>> '
+        + '{ data = '
+        + typeof this.data +
+        '}')
     }
   }
 
   URLSearch.prototype.toString = function() {
-    var that = this;
-    var result = [];
+    var that = this,
+      result = [];
     Object.keys(this.data).forEach(function(key) {
       result.push(key + '=' + that.data[key])
     });
@@ -93,41 +144,55 @@
     return true
   }
 
-  function parseURL() {
-    var search = window.location.search;
-    var map = [];
-    var array = search.replace(/^\?+/g, '').split('&');
-    if (array.length) {
-      for (var i = 0; i < array.length; i++) {
-        var obj = {}
-        var current = array[i].split('=');
-        if (current.length && current.length > 1) {
-          obj[current[0]] = decodeURI(current[1]);
-          map.push(obj)
+  function parseURL(url) {
+    var search = (url || window.location.search).split('?'),
+      map = [];
+    if (search.length >= 2 && search[1]) {
+      var array = search[1].replace(/^\?+/g, '').split('&');
+      if (array.length) {
+        for (var i = 0; i < array.length; i++) {
+          var obj = {}
+          var current = array[i].split('=');
+          if (current.length && current.length > 1) {
+            obj[current[0]] = decodeURI(current[1]);
+            map.push(obj)
+          }
         }
       }
+      return map
     }
-    return map
   }
 
   function watcher(obj) {
-    if (Object.defineProperty) {
-      Object.keys(obj).forEach(function(key) {
-        var value = obj[key];
-        Object.defineProperty(obj, key, {
-          get: function getter() {
-            return value
-          },
-          set: function setter(newVal) {
-            if (newVal !== value && typeof newVal !== 'object' && typeof newVal !== 'function') {
+    Object.keys(obj).forEach(function(key) {
+      var value = obj[key];
+      Object.defineProperty(obj, key, {
+        get: function getter() {
+          return value
+        },
+        set: function setter(newVal) {
+          console.log(newVal)
+          if (newVal && (
+              typeof newVal === 'string' ||
+              typeof newVal === 'number'
+            )) {
+            if (newVal !== value) {
               value = newVal;
               update(obj)
             }
+          } else {
+            console.warn(
+              'Only values ​​of type String|Number can be added =>> '
+              + '\n data = { '
+              + key
+              + ': '
+              + typeof newVal +
+              ' }')
           }
-        })
-      });
-      return obj
-    }
+        }
+      })
+    });
+    return obj
   }
 
   function update(data) {
